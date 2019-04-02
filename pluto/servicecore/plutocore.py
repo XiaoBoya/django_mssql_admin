@@ -28,6 +28,7 @@ class FilterOption(object):
 
     def get_queryset(self,_field):
         if self.condition:
+
             return _field.rel.to.objects.filter(**self.condition)
         return _field.rel.to.objects.all()
 
@@ -545,7 +546,7 @@ class StarkSite(object):
             app_name = model_class._meta.app_label
             model_name = model_class._meta.model_name
 
-            curd_url = url(r'^%s/%s/' % (app_name, model_name,), (stark_config_obj.urls, None, None))
+            curd_url = re_path(r'^%s/%s/' % (app_name, model_name,), (stark_config_obj.urls, None, None))
             url_pattern.append(curd_url)
 
         return url_pattern
