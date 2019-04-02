@@ -5,6 +5,7 @@ from django.shortcuts import render,redirect
 from django.utils.safestring import mark_safe
 from django.urls import reverse
 from django.http import QueryDict
+from django.db.models import Q
 
 class FilterOption(object):
     def __init__(self,field_name,multi=False,condition=None,is_choice=False,text_func_name=None, val_func_name=None):
