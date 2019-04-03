@@ -7,33 +7,33 @@ from django.urls import reverse
 from django.http import QueryDict
 from django.db.models import Q
 
-class FilterOption(object):
-    def __init__(self,field_name,multi=False,condition=None,is_choice=False,text_func_name=None, val_func_name=None):
-        """
-        :param field_name: 字段
-        :param multi:  是否多选
-        :param condition: 显示数据的筛选条件
-        :param is_choice: 是否是choice
-        :param text_func_name: 组合搜索时，页面上生成显示的文本的函数
-        :param val_func_name: 组合搜索时，页面上生成的a标签中的值的函数
-        """
-        self.field_name = field_name
-        self.multi = multi
-        self.is_choice = is_choice
-
-        self.condition = condition
-
-        self.text_func_name = text_func_name
-        self.val_func_name = val_func_name
-
-    def get_queryset(self,_field):
-        if self.condition:
-
-            return _field.rel.to.objects.filter(**self.condition)
-        return _field.rel.to.objects.all()
-
-    def get_choices(self,_field):
-        return _field.choices
+# class FilterOption(object):
+#     def __init__(self,field_name,multi=False,condition=None,is_choice=False,text_func_name=None, val_func_name=None):
+#         """
+#         :param field_name: 字段
+#         :param multi:  是否多选
+#         :param condition: 显示数据的筛选条件
+#         :param is_choice: 是否是choice
+#         :param text_func_name: 组合搜索时，页面上生成显示的文本的函数
+#         :param val_func_name: 组合搜索时，页面上生成的a标签中的值的函数
+#         """
+#         self.field_name = field_name
+#         self.multi = multi
+#         self.is_choice = is_choice
+#
+#         self.condition = condition
+#
+#         self.text_func_name = text_func_name
+#         self.val_func_name = val_func_name
+#
+#     def get_queryset(self,_field):
+#         if self.condition:
+#
+#             return _field.rel.to.objects.filter(**self.condition)
+#         return _field.rel.to.objects.all()
+#
+#     def get_choices(self,_field):
+#         return _field.choices
 
 class FilterRow(object):
     def __init__(self,option, data, request):
@@ -538,10 +538,10 @@ class StarkSite(object):
                 models.UserInfo: StarkConfig(models.UserInfo,self),
                 models.Role: StarkConfig(models.Role,self)
             }
-            /stark/app01/userinfo/
-            /stark/app01/userinfo/add/
-            /stark/app01/userinfo/(\d+)/change/
-            /stark/app01/userinfo/(\d+)/delete/
+            /pluto/app01/userinfo/
+            /pluto/app01/userinfo/add/
+            /pluto/app01/userinfo/(\d+)/change/
+            /pluto/app01/userinfo/(\d+)/delete/
             """
             app_name = model_class._meta.app_label
             model_name = model_class._meta.model_name
