@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form action="">
+    {% csrf_token %}
+    {% for foo in BrandCleanForm %}
+        <div>
+        <label for="">{{ foo.label }}：</label>
+        {{ foo }}
+        </div>
+    {% endfor %}
+
+
+</form>
+
+</body>
+</html>

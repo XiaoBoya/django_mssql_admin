@@ -16,9 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from pluto.sql_models import site
 import pluto.views as p_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('pluto/', p_views.index),
+    path('pluto/', site.urls),
 ]
