@@ -2,12 +2,11 @@ import pyodbc
 import collections
 from DBUtils import PooledDB
 
-from django.shortcuts import render,HttpResponse
+from django.shortcuts import render,HttpResponse,redirect
 from django.forms import Form
 from django.forms import fields
 from django.forms import widgets
-from django.db import models
-from django.urls import path, re_path
+from django.urls import  re_path
 from django.utils.safestring import mark_safe
 from django.urls import reverse
 
@@ -44,8 +43,8 @@ class SingleRecord(object):
 
 class SQLModel(SQLConnect):
 
-    def __init__(self, connect_args,connect_kwargs, tablename, alias):
-        SQLConnect.__init__(self, connect_args,connect_kwargs)
+    def __init__(self, connect_args, connect_kwargs, tablename, alias):
+        SQLConnect.__init__(self, connect_args, connect_kwargs)
         self.tablename = tablename
         self.alias = alias
         self._get_fieldname()
@@ -54,7 +53,7 @@ class SQLModel(SQLConnect):
         conn, cur = self.new_connect()
         cur.execute('select top 1 * from %s' % self.tablename)
         des = cur.description
-        self.fieldlist = [(item[0],item[1],item[-1])  for item in des]
+        self.fieldlist = [(item[0], item[1], item[-1]) for item in des]
         cur.close()
         conn.close()
 
@@ -66,7 +65,7 @@ class SQLModel(SQLConnect):
         conn.close()
         result = []
         for i in res:
-           result.append(SingleRecord(i, self.fieldlist))
+            result.append(SingleRecord(i, self.fieldlist))
         return result
 
     def filter(self,**kwargs):
@@ -84,10 +83,10 @@ class SQLModel(SQLConnect):
             result.append(SingleRecord(i, self.fieldlist))
         return result
 
-    def create_form(self):
+    def create_form(self, single_data=None):
         info_dict = collections.OrderedDict()
+        single_data  = single_data if single_data else dict()
         for field_obj in self.fieldlist:
-            print(field_obj)
             if field_obj[1] == str:
                 info_dict[field_obj[0]] = fields.CharField(
                     required=not field_obj[2],
@@ -96,17 +95,18 @@ class SQLModel(SQLConnect):
                     },
                     widget=widgets.TextInput(
                         attrs={
-                            "placeholder":field_obj[0],
-                            "class":"form-control col-md-7 col-xs-12"
+                            "placeholder": field_obj[0],
+                            "class": "form-control col-md-7 col-xs-12"
                         }
                     ),
-                    label=field_obj[0]
+                    label=field_obj[0],
+                    initial=single_data.get(field_obj[0])
                 )
             elif field_obj[1] == int:
                 info_dict[field_obj[0]] = fields.IntegerField(
                     required=not field_obj[2],
                     error_messages={
-                        "required": "%s不能为空"%field_obj[0],
+                        "required": "%s不能为空" % field_obj[0],
                     },
                     widget=widgets.TextInput(
                         attrs={
@@ -114,13 +114,14 @@ class SQLModel(SQLConnect):
                             "class": "form-control col-md-7 col-xs-12"
                         }
                     ),
-                    label=field_obj[0]
+                    label=field_obj[0],
+                    initial=single_data.get(field_obj[0])
                 )
             elif field_obj[1] == float:
                 info_dict[field_obj[0]] = fields.FloatField(
                     required=not field_obj[2],
                     error_messages={
-                        "required": "%s不能为空"%field_obj[0],
+                        "required": "%s不能为空" % field_obj[0],
                     },
                     widget=widgets.TextInput(
                         attrs={
@@ -128,9 +129,10 @@ class SQLModel(SQLConnect):
                             "class": "form-control col-md-7 col-xs-12"
                         }
                     ),
-                    label=field_obj[0]
+                    label=field_obj[0],
+                    initial=single_data.get(field_obj[0])
                 )
-        return type('%sForm'%self.alias, (Form, ), info_dict)
+        return type('%sForm' % self.alias, (Form, ), info_dict)
 
 
 class PlutoConfig(object):
@@ -138,17 +140,39 @@ class PlutoConfig(object):
     list_display: 展示用的字段
     '''
     pk = 'id'
-    link_field = (pk, )
 
-    list_display = ()
+    have_checkbox = True
+
+    # 管理列表页面的展示
+    list_display = []
+    def get_list_display(self):
+        if not self.list_display:
+            self.list_display = [one[0] for one in self.model_obj.fieldlist]
+        return self.list_display
+
+    # 连接字段
+    link_field = ()
+    def get_link_field(self):
+        if not self.link_field:
+            self.link_field = (self.pk, )
+        return self.link_field
+
     def changelist_view(self, request, *args, **kwargs):
-        if self.list_display:
-            thead = self.list_display
-        else:
-            thead = [one[0] for one in self.model_obj.fieldlist]
+        self.link_field = self.get_link_field()
+        thead = self.get_list_display()
+        if self.have_checkbox:
+            thead.insert(0, '')
         show_list = []
         for single_data in self.model_obj.all():
-            show_list.append([single_data.get(field_) for field_ in thead])
+            if self.have_checkbox:
+                data_list = [mark_safe('<input type="checkbox" name="select" id="%s">'%single_data.get(self.pk))]
+                start_inex = 1
+            else:
+                data_list = []
+                start_inex = 0
+            for field_ in thead[start_inex:]:
+                data_list.append(single_data.get(field_) if field_ not in self.link_field else mark_safe('<a href="{1}/change/">{0}</a>'.format(single_data.get(field_),single_data.get(self.pk))))
+            show_list.append(data_list)
         return render(request, 'changelist.html', {'show_list': show_list, 'thead_': thead})
 
     def __init__(self, model_obj, site):
@@ -190,8 +214,13 @@ class PlutoConfig(object):
     def delete_view(self):
         pass
 
-    def change_view(self):
-        pass
+    def change_view(self, request, *args, **kwargs):
+        if request.method == 'GET':
+            exec('single_data = self.model_obj.filter({0}=args[0])[0]'.format(self.pk))
+            the_form = self.model_obj.create_form(vars()['single_data'])
+            return render(request, 'add.html', {'the_form': the_form})
+        else:
+            return redirect('/pluto/%s/' % self.model_obj.alias)
 
 class PlutoSite(object):
 
@@ -222,5 +251,6 @@ print(a.fieldlist)
 
 class AConfig(PlutoConfig):
     pk='brandid'
+    list_display = ['brandid', 'media', 'code', 'itemBrand']
 
 site.register(a, AConfig)

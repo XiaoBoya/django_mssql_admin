@@ -17,7 +17,7 @@
         {% for one in show_list %}
         <tr>
             {% for v in one %}
-            <td>{{ v }}</td>
+            <td>{{ v|safe }}</td>
             {% endfor %}
         </tr>
         {% endfor %}
