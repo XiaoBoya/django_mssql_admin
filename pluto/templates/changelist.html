@@ -5,9 +5,25 @@
     <title>Title</title>
 </head>
 <body>
-{% for foo in show_list %}
-<p>{{ foo }}</p>
-{% endfor %}
+<table>
+    <thead>
+    <tr>
+        {% for th_ in thead_ %}
+        <th>{{ th_ }}</th>
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+        {% for one in show_list %}
+        <tr>
+            {% for v in one %}
+            <td>{{ v }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 
 </body>
 </html>

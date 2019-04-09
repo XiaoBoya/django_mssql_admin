@@ -2,13 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6ca3d4c9-32b4-4cb1-930f-5263ab78ab4a" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/pluto/templates/add.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pluto/templates/changelist.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pluto/sql_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/pluto/sql_models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pluto/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/pluto/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xbyadmin/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/xbyadmin/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pluto/templates/changelist.html" beforeDir="false" afterPath="$PROJECT_DIR$/pluto/templates/changelist.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -27,7 +23,7 @@
         <entry file="file://$PROJECT_DIR$/xbyadmin/urls.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="418">
-              <caret line="22" column="36" lean-forward="true" selection-start-line="22" selection-start-column="36" selection-end-line="22" selection-end-column="36" />
+              <caret line="22" column="36" selection-start-line="22" selection-start-column="36" selection-end-line="22" selection-end-column="36" />
               <folding>
                 <element signature="e#632#664#0" expanded="true" />
               </folding>
@@ -47,13 +43,10 @@
       <file leaf-file-name="sql_models.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/pluto/sql_models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-287">
-              <caret line="15" column="25" selection-start-line="15" selection-start-column="25" selection-end-line="15" selection-end-column="25" />
+            <state relative-caret-position="278">
+              <caret line="150" column="52" selection-start-line="150" selection-start-column="52" selection-end-line="150" selection-end-column="52" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
-                <element signature="e#136#445#0" />
-                <element signature="e#632#3881#0" />
-                <element signature="e#3853#4504#0" />
               </folding>
             </state>
           </provider>
@@ -63,7 +56,7 @@
         <entry file="file://$PROJECT_DIR$/pluto/templates/add.html">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="190">
-              <caret line="10" column="9" lean-forward="true" selection-start-line="10" selection-start-column="9" selection-end-line="10" selection-end-column="9" />
+              <caret line="10" column="9" selection-start-line="10" selection-start-column="9" selection-end-line="10" selection-end-column="9" />
             </state>
           </provider>
         </entry>
@@ -71,8 +64,8 @@
       <file leaf-file-name="changelist.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/pluto/templates/changelist.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="152">
-              <caret line="8" column="12" selection-start-line="8" selection-start-column="12" selection-end-line="8" selection-end-column="12" />
+            <state relative-caret-position="228">
+              <caret line="20" column="24" lean-forward="true" selection-start-line="20" selection-start-column="24" selection-end-line="20" selection-end-column="24" />
             </state>
           </provider>
         </entry>
@@ -81,7 +74,7 @@
         <entry file="file://$PROJECT_DIR$/pluto/views.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="171">
-              <caret line="9" lean-forward="true" selection-start-line="9" selection-end-line="9" />
+              <caret line="9" selection-start-line="9" selection-end-line="9" />
               <folding>
                 <element signature="e#0#48#0" expanded="true" />
               </folding>
@@ -137,6 +130,7 @@
         <option value="$PROJECT_DIR$/pluto/template/changelist.html" />
         <option value="$PROJECT_DIR$/pluto/templates/add.html" />
         <option value="$PROJECT_DIR$/pluto/sql_models.py" />
+        <option value="$PROJECT_DIR$/pluto/templates/changelist.html" />
       </list>
     </option>
   </component>
@@ -149,7 +143,7 @@
   <component name="NodePackageJsonFileManager">
     <packageJsonPaths />
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="1358" />
     <option name="y" value="-8" />
     <option name="width" value="1936" />
@@ -170,6 +164,11 @@
             <path>
               <item name="xbyadmin" type="b2602c69:ProjectViewProjectNode" />
               <item name="xbyadmin" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="xbyadmin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="xbyadmin" type="462c0819:PsiDirectoryNode" />
+              <item name="app01" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="xbyadmin" type="b2602c69:ProjectViewProjectNode" />
@@ -196,11 +195,6 @@
             <path>
               <item name="xbyadmin" type="b2602c69:ProjectViewProjectNode" />
               <item name="xbyadmin" type="462c0819:PsiDirectoryNode" />
-              <item name="utils" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="xbyadmin" type="b2602c69:ProjectViewProjectNode" />
-              <item name="xbyadmin" type="462c0819:PsiDirectoryNode" />
               <item name="xbyadmin" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
@@ -213,7 +207,7 @@
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://C:/Users/venndata5/Desktop/xbyadmin/pluto/servicecore/plutocore.py" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../stark/s6day109" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../venncheck" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
   </component>
@@ -325,7 +319,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1358" y="-8" width="1936" height="1056" extended-state="7" />
+    <frame x="1358" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -612,17 +606,10 @@
     <entry file="file://$PROJECT_DIR$/xbyadmin/urls.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="418">
-          <caret line="22" column="36" lean-forward="true" selection-start-line="22" selection-start-column="36" selection-end-line="22" selection-end-column="36" />
+          <caret line="22" column="36" selection-start-line="22" selection-start-column="36" selection-end-line="22" selection-end-column="36" />
           <folding>
             <element signature="e#632#664#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="380">
-          <caret line="20" column="7" selection-start-line="20" selection-start-column="7" selection-end-line="20" selection-end-column="7" />
         </state>
       </provider>
     </entry>
@@ -630,23 +617,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1041">
           <caret line="129" selection-start-line="129" selection-end-line="129" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pluto/templates/add.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="190">
-          <caret line="10" column="9" lean-forward="true" selection-start-line="10" selection-start-column="9" selection-end-line="10" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pluto/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="171">
-          <caret line="9" lean-forward="true" selection-start-line="9" selection-end-line="9" />
-          <folding>
-            <element signature="e#0#48#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -671,23 +641,44 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/pluto/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="171">
+          <caret line="9" selection-start-line="9" selection-end-line="9" />
+          <folding>
+            <element signature="e#0#48#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pluto/templates/add.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="190">
+          <caret line="10" column="9" selection-start-line="10" selection-start-column="9" selection-end-line="10" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="380">
+          <caret line="20" column="7" selection-start-line="20" selection-start-column="7" selection-end-line="20" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/pluto/sql_models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-287">
-          <caret line="15" column="25" selection-start-line="15" selection-start-column="25" selection-end-line="15" selection-end-column="25" />
+        <state relative-caret-position="278">
+          <caret line="150" column="52" selection-start-line="150" selection-start-column="52" selection-end-line="150" selection-end-column="52" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
-            <element signature="e#136#445#0" />
-            <element signature="e#632#3881#0" />
-            <element signature="e#3853#4504#0" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/pluto/templates/changelist.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="8" column="12" selection-start-line="8" selection-start-column="12" selection-end-line="8" selection-end-column="12" />
+        <state relative-caret-position="228">
+          <caret line="20" column="24" lean-forward="true" selection-start-line="20" selection-start-column="24" selection-end-line="20" selection-end-column="24" />
         </state>
       </provider>
     </entry>

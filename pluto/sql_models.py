@@ -25,6 +25,23 @@ class SQLConnect(object):
         cur = conn.cursor()
         return conn, cur
 
+
+class SingleRecord(object):
+
+    def __init__(self, data_list, field_list):
+        for i, data in enumerate(data_list):
+            if isinstance(data, str):
+                exec('self.{0} = "{1}"'.format(field_list[i][0], data))
+            else:
+                exec('self.{0} = {1}'.format(field_list[i][0], data))
+
+    def __iter__(self):
+        return self
+
+    def get(self, name):
+        return self.__getattribute__(name)
+
+
 class SQLModel(SQLConnect):
 
     def __init__(self, connect_args,connect_kwargs, tablename, alias):
@@ -47,7 +64,10 @@ class SQLModel(SQLConnect):
         res = cur.fetchall()
         cur.close()
         conn.close()
-        return res
+        result = []
+        for i in res:
+           result.append(SingleRecord(i, self.fieldlist))
+        return result
 
     def filter(self,**kwargs):
         filter_llist = []
@@ -59,7 +79,10 @@ class SQLModel(SQLConnect):
         res = cur.fetchall()
         cur.close()
         conn.close()
-        return res
+        result = []
+        for i in res:
+            result.append(SingleRecord(i, self.fieldlist))
+        return result
 
     def create_form(self):
         info_dict = collections.OrderedDict()
@@ -113,9 +136,20 @@ class SQLModel(SQLConnect):
 class PlutoConfig(object):
     '''
     list_display: 展示用的字段
-    show_field: 需要显示的字段
-    read_only_field: 只读的字段
     '''
+    pk = 'id'
+    link_field = (pk, )
+
+    list_display = ()
+    def changelist_view(self, request, *args, **kwargs):
+        if self.list_display:
+            thead = self.list_display
+        else:
+            thead = [one[0] for one in self.model_obj.fieldlist]
+        show_list = []
+        for single_data in self.model_obj.all():
+            show_list.append([single_data.get(field_) for field_ in thead])
+        return render(request, 'changelist.html', {'show_list': show_list, 'thead_': thead})
 
     def __init__(self, model_obj, site):
         self.model_obj = model_obj
@@ -136,8 +170,8 @@ class PlutoConfig(object):
         url_patterns = [
             re_path(r'^$', self.wrap(self.changelist_view), name="%s_changlist" % model_name),
             re_path(r'^add/$', self.wrap(self.add_view), name="%s_add" % model_name),
-            re_path(r'^(\d+)/delete/$', self.wrap(self.delete_view), name="%s_delete" % model_name),
-            re_path(r'^(\d+)/change/$', self.wrap(self.change_view), name="%s_change" % model_name),
+            re_path(r'^(\w+)/delete/$', self.wrap(self.delete_view), name="%s_delete" % model_name),
+            re_path(r'^(\w+)/change/$', self.wrap(self.change_view), name="%s_change" % model_name),
         ]
         url_patterns.extend(self.extra_url())
         return url_patterns
@@ -148,10 +182,6 @@ class PlutoConfig(object):
     @property
     def urls(self):
         return self.get_urls()
-
-    def changelist_view(self, request, *args, **kwargs):
-        show_list = self.model_obj.all()
-        return render(request, 'changelist.html', {'show_list': show_list})
 
     def add_view(self, request, *args, **kwargs):
         the_form = self.model_obj.create_form()
@@ -190,4 +220,7 @@ site = PlutoSite()
 a = SQLModel(settings.SQL_ARGS, settings.SQL_DATABASE['brandcheck'], 'masasys.dbo.tb_sys_all_brand_clean', 'BrandClean')
 print(a.fieldlist)
 
-site.register(a)
+class AConfig(PlutoConfig):
+    pk='brandid'
+
+site.register(a, AConfig)
