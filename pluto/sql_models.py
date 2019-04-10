@@ -10,7 +10,7 @@ from django.urls import  re_path
 from django.utils.safestring import mark_safe
 from django.urls import reverse
 
-from xbyadmin import settings
+from django_mssql_admin import settings
 
 class SQLConnect(object):
 
