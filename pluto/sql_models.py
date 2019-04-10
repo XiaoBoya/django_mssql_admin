@@ -211,14 +211,15 @@ class PlutoConfig(object):
         the_form = self.model_obj.create_form()
         return render(request, 'add.html', {'the_form': the_form})
 
-    def delete_view(self):
-        pass
+    def delete_view(self, request, *args, **kwargs):
+        if request.method == 'GET':
+            return render(request, 'delete.html')
 
     def change_view(self, request, *args, **kwargs):
         if request.method == 'GET':
             exec('single_data = self.model_obj.filter({0}=args[0])[0]'.format(self.pk))
             the_form = self.model_obj.create_form(vars()['single_data'])
-            return render(request, 'add.html', {'the_form': the_form})
+            return render(request, 'change.html', {'the_form': the_form})
         else:
             return redirect('/pluto/%s/' % self.model_obj.alias)
 
@@ -247,9 +248,9 @@ class PlutoSite(object):
 site = PlutoSite()
 
 a = SQLModel(settings.SQL_ARGS, settings.SQL_DATABASE['brandcheck'], 'masasys.dbo.tb_sys_all_brand_clean', 'BrandClean')
-print(a.fieldlist)
 
 class AConfig(PlutoConfig):
+    have_checkbox = False
     pk='brandid'
     list_display = ['brandid', 'media', 'code', 'itemBrand']
 

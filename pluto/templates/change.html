@@ -1,19 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<form action="" method="post">
+{% extends "base_site.html" %}
+
+{% block content %}
+    <div class="right_col" role="main">
+    <form action="" method="post" class="form-horizontal form-label-left">
     {% csrf_token %}
     {% for foo in the_form %}
-    <div>
-        <label for="">{{ foo.label }}</label>
-    <p>{{ foo }}</p>
+    <div class="item form-group">
+        <label class="control-label col-md-3 col-sm-3 col-xs-12">{{ foo.label }}</label>
+        <div class="col-md-6 col-sm-6 col-xs-12">
+            {{ foo }}
+        </div>
     </div>
     {% endfor %}
-    <input type="submit">
+    <div class="form-group">
+        <div class="col-md-6 col-md-offset-3">
+            <button class="btn btn-primary">取消</button>
+            <button class="btn btn-success">提交</button>
+        </div>
+    </div>
+
 </form>
-</body>
-</html>
+    </div>
+{% endblock content %}
