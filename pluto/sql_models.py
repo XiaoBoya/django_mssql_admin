@@ -62,7 +62,7 @@ class SQLModel(SQLConnect):
 
     def all(self):
         conn, cur = self.new_connect()
-        cur.execute('select top 1000 * from %s' % self.tablename)
+        cur.execute('select top 100 * from %s' % self.tablename)
         res = cur.fetchall()
         cur.close()
         conn.close()
@@ -87,6 +87,17 @@ class SQLModel(SQLConnect):
             result.append(SingleRecord(i, self.fieldlist))
         return result
 
+    def save(self, fields, values):
+        try:
+            conn, cur = self.new_connect()
+            cur.execute('insert into %s%s values%s' % (self.tablename, fields, values))
+            cur.commit()
+            cur.close()
+            conn.close()
+            return '200'
+        except Exception as e:
+            return e
+
 
 class PlutoConfig(object):
     '''
@@ -105,7 +116,7 @@ class PlutoConfig(object):
         if not self.list_display:
             self.list_display = [one[0] for one in self.model_obj.fieldlist]
         else:
-            self.list_display.remove('') if '' in self.list_display else 0
+            self.list_display.remove('<input type="checkbox" id="check-all" class="flat">') if '<input type="checkbox" id="check-all" class="flat">' in self.list_display else 0
         return self.list_display
 
     # 连接字段
@@ -116,18 +127,23 @@ class PlutoConfig(object):
             self.link_field = (self.pk,)
         return self.link_field
 
-    #
-    fields = ()
+    # 修改添加页面展示的列
+    fields = []
+
+    def get_fields(self):
+        if not self.fields:
+            self.fields = self.model_obj.fieldlist
+        return self.fields
 
     def changelist_view(self, request, *args, **kwargs):
         self.link_field = self.get_link_field()
         thead = self.get_list_display()
         if self.have_checkbox:
-            thead.insert(0, '')
+            thead.insert(0, mark_safe('<input type="checkbox" id="check-all" class="flat">'))
         show_list = []
         for single_data in self.model_obj.all():
             if self.have_checkbox:
-                data_list = [mark_safe('<input type="checkbox" name="select" id="%s">' % single_data.get(self.pk))]
+                data_list = [mark_safe('<input type="checkbox" class="flat" name="table_records" id="%s">' % single_data.get(self.pk))]
                 start_inex = 1
             else:
                 data_list = []
@@ -138,9 +154,15 @@ class PlutoConfig(object):
             show_list.append(data_list)
         return render(request, 'changelist.html', {'show_list': show_list, 'thead_': thead})
 
+
     def add_view(self, request, *args, **kwargs):
-        the_form = self.create_form()
-        return render(request, 'add.html', {'the_form': the_form})
+        if request.method == 'GET':
+            the_form = self.create_form()
+            return render(request, 'add.html', {'the_form': the_form})
+        else:
+            self.model_obj.save()
+            return redirect('/pluto/%s/' % self.model_obj.alias)
+
 
     def __init__(self, model_obj, site):
         self.model_obj = model_obj
@@ -152,7 +174,9 @@ class PlutoConfig(object):
     def create_form(self, single_data=None):
         info_dict = collections.OrderedDict()
         single_data = single_data if single_data else dict()
+        self.fields = self.get_fields()
         for field_obj in self.model_obj.fieldlist:
+            if field_obj[0] not in self.fields: continue
             if field_obj[1] == str:
                 info_dict[field_obj[0]] = fields.CharField(
                     required=not field_obj[2],
@@ -219,7 +243,6 @@ class PlutoConfig(object):
         def inner(request, *args, **kwargs):
             self.request = request
             return view_func(request, *args, **kwargs)
-
         return inner
 
     def get_urls(self):
@@ -252,9 +275,18 @@ class PlutoConfig(object):
         if request.method == 'POST':
             form_obj = the_form(request.POST)
             if form_obj.is_valid():
-                return redirect('/pluto/%s/' % self.model_obj.alias)
+                fields, values = [], []
+                for k, v in request.POST.items():
+                    if k == 'csrfmiddlewaretoken': continue
+                    fields.append(k), values.append(v)
+                fields_str, values_str = '(%s)' % str(fields).strip('[]'), '(%s)' % str(values).strip('[]')
+                info =  self.model_obj.save(fields_str, values_str)
+                if info == '200':
+                    return redirect('/pluto/%s/' % self.model_obj.alias)
+                else:
+                    return render(request, "change.html", {"form_obj": form_obj, 'e': info})
             else:
-                return render(request, "change.html", {"form_obj": form_obj})
+                return render(request, "change.html", {"form_obj": the_form})
 
 
 class PlutoSite(object):
@@ -292,7 +324,9 @@ class AConfig(PlutoConfig):
 
 
 class BConfig(PlutoConfig):
+    list_display = ['brandId', 'brandStr', 'brandcn', 'branden']
     pk = 'brandId'
+    fields = ['brandId', 'brandStr', 'brandcn', 'brandxn']
 
 
 site.register(a, AConfig)

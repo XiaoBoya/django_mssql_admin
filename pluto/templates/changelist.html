@@ -1,27 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<table>
-    <thead>
-    <tr>
-        {% for th_ in thead_ %}
-        <th>{{ th_ }}</th>
-        {% endfor %}
-    </tr>
-    </thead>
-    <tbody>
-        {% for one in show_list %}
+{% extends "base_site.html" %}
+
+{% block content %}
+    <div class="right_col" role="main">
+    <table class="table table-striped jambo_table bulk_action">
+        <thead>
         <tr>
-            {% for v in one %}
-            <td>{{ v|safe }}</td>
+            {% for th_obj in thead_ %}
+            <th>{{ th_obj|safe}}</th>
             {% endfor %}
         </tr>
-        {% endfor %}
-    </tbody>
-</table>
-</body>
-</html>
+        </thead>
+        <tbody>
+            {% for one in show_list %}
+            <tr>
+                {% for v in one %}
+                <td>{{ v|safe }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+{% endblock content %}

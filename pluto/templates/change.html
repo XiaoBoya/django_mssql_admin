@@ -2,6 +2,9 @@
 
 {% block content %}
     <div class="right_col" role="main">
+    <div>
+        <h1>{{ e }}</h1>
+    </div>
     <form action="" method="post" class="form-horizontal form-label-left">
     {% csrf_token %}
     {% for foo in the_form %}
