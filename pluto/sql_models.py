@@ -1,16 +1,18 @@
 import pyodbc
 import collections
 from DBUtils import PooledDB
+import datetime
 
-from django.shortcuts import render,HttpResponse,redirect
+from django.shortcuts import render, HttpResponse, redirect
 from django.forms import Form
 from django.forms import fields
 from django.forms import widgets
-from django.urls import  re_path
+from django.urls import re_path
 from django.utils.safestring import mark_safe
-from django.urls import reverse
+# from django.urls import reverse
 
 from django_mssql_admin import settings
+
 
 class SQLConnect(object):
 
@@ -31,8 +33,10 @@ class SingleRecord(object):
         for i, data in enumerate(data_list):
             if isinstance(data, str):
                 exec('self.{0} = "{1}"'.format(field_list[i][0], data))
-            else:
+            elif isinstance(data, int):
                 exec('self.{0} = {1}'.format(field_list[i][0], data))
+            else:
+                exec('self.{0} = "{1}"'.format(field_list[i][0], data if data else ''))
 
     def __iter__(self):
         return self
@@ -68,10 +72,11 @@ class SQLModel(SQLConnect):
             result.append(SingleRecord(i, self.fieldlist))
         return result
 
-    def filter(self,**kwargs):
+    def filter(self, **kwargs):
         filter_llist = []
         for filter_dict in kwargs:
-            filter_llist.append('%s=%s' % (filter_dict, kwargs[filter_dict] if type(filter_dict)!=str else "'%s'"%kwargs[filter_dict]))
+            filter_llist.append('%s=%s' % (
+            filter_dict, kwargs[filter_dict] if type(filter_dict) != str else "'%s'" % kwargs[filter_dict]))
         filter_info = ' and '.join(filter_llist)
         conn, cur = self.new_connect()
         cur.execute('select * from %s where %s' % (self.tablename, filter_info))
@@ -85,13 +90,13 @@ class SQLModel(SQLConnect):
 
     def create_form(self, single_data=None):
         info_dict = collections.OrderedDict()
-        single_data  = single_data if single_data else dict()
+        single_data = single_data if single_data else dict()
         for field_obj in self.fieldlist:
             if field_obj[1] == str:
                 info_dict[field_obj[0]] = fields.CharField(
                     required=not field_obj[2],
                     error_messages={
-                        "required":"%s不能为空"%field_obj[0],
+                        "required": "%s不能为空" % field_obj[0],
                     },
                     widget=widgets.TextInput(
                         attrs={
@@ -132,7 +137,22 @@ class SQLModel(SQLConnect):
                     label=field_obj[0],
                     initial=single_data.get(field_obj[0])
                 )
-        return type('%sForm' % self.alias, (Form, ), info_dict)
+            elif field_obj[1] == datetime.datetime:
+                info_dict[field_obj[0]] = fields.DateTimeField(
+                    required=not field_obj[2],
+                    error_messages={
+                        "required": "%s不能为空" % field_obj[0],
+                    },
+                    widget=widgets.SplitDateTimeWidget(
+                        attrs={
+                            "placeholder": field_obj[0],
+                            "class": "form-control col-md-7 col-xs-12"
+                        }
+                    ),
+                    label=field_obj[0],
+                    initial=single_data.get(field_obj[0])
+                )
+        return type('%sForm' % self.alias, (Form,), info_dict)
 
 
 class PlutoConfig(object):
@@ -145,6 +165,7 @@ class PlutoConfig(object):
 
     # 管理列表页面的展示
     list_display = []
+
     def get_list_display(self):
         if not self.list_display:
             self.list_display = [one[0] for one in self.model_obj.fieldlist]
@@ -152,9 +173,10 @@ class PlutoConfig(object):
 
     # 连接字段
     link_field = ()
+
     def get_link_field(self):
         if not self.link_field:
-            self.link_field = (self.pk, )
+            self.link_field = (self.pk,)
         return self.link_field
 
     def changelist_view(self, request, *args, **kwargs):
@@ -165,13 +187,14 @@ class PlutoConfig(object):
         show_list = []
         for single_data in self.model_obj.all():
             if self.have_checkbox:
-                data_list = [mark_safe('<input type="checkbox" name="select" id="%s">'%single_data.get(self.pk))]
+                data_list = [mark_safe('<input type="checkbox" name="select" id="%s">' % single_data.get(self.pk))]
                 start_inex = 1
             else:
                 data_list = []
                 start_inex = 0
             for field_ in thead[start_inex:]:
-                data_list.append(single_data.get(field_) if field_ not in self.link_field else mark_safe('<a href="{1}/change/">{0}</a>'.format(single_data.get(field_),single_data.get(self.pk))))
+                data_list.append(single_data.get(field_) if field_ not in self.link_field else mark_safe(
+                    '<a href="{1}/change/">{0}</a>'.format(single_data.get(field_), single_data.get(self.pk))))
             show_list.append(data_list)
         return render(request, 'changelist.html', {'show_list': show_list, 'thead_': thead})
 
@@ -220,8 +243,10 @@ class PlutoConfig(object):
             exec('single_data = self.model_obj.filter({0}=args[0])[0]'.format(self.pk))
             the_form = self.model_obj.create_form(vars()['single_data'])
             return render(request, 'change.html', {'the_form': the_form})
-        else:
+        if request.method == 'POST':
+            print(request.POST)
             return redirect('/pluto/%s/' % self.model_obj.alias)
+
 
 class PlutoSite(object):
 
@@ -237,21 +262,29 @@ class PlutoSite(object):
         url_pattern = []
         for model_obj, pluto_config_obj in self._registry.items():
             tablename = model_obj.alias
-            curd_url = re_path(r'^%s/' %(tablename,) , (pluto_config_obj.urls,None,None))
+            curd_url = re_path(r'^%s/' % (tablename,), (pluto_config_obj.urls, None, None))
             url_pattern.append(curd_url)
         return url_pattern
 
     @property
     def urls(self):
-        return (self.get_urls(),None,'pluto')
+        return (self.get_urls(), None, 'pluto')
+
 
 site = PlutoSite()
 
 a = SQLModel(settings.SQL_ARGS, settings.SQL_DATABASE['brandcheck'], 'masasys.dbo.tb_sys_all_brand_clean', 'BrandClean')
+b = SQLModel(settings.SQL_ARGS, settings.SQL_DATABASE['brandcheck'], 'masasys.dbo.tb_sys_brand_info', 'BrandInfo')
 
 class AConfig(PlutoConfig):
     have_checkbox = False
-    pk='brandid'
+    pk = 'brandid'
     list_display = ['brandid', 'media', 'code', 'itemBrand']
 
+
+class BConfig(PlutoConfig):
+    pk = 'brandId'
+
+
 site.register(a, AConfig)
+site.register(b, BConfig)
