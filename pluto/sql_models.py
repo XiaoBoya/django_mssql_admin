@@ -13,7 +13,6 @@ from django.utils.safestring import mark_safe
 
 from django_mssql_admin import settings
 
-
 class SQLConnect(object):
 
     def __init__(self, conn_args, conn_kwargs):
@@ -88,10 +87,72 @@ class SQLModel(SQLConnect):
             result.append(SingleRecord(i, self.fieldlist))
         return result
 
+
+class PlutoConfig(object):
+    '''
+    pk: 定义主键，用于标识唯一数据
+    have_checkbox: 是否有多选框
+    list_display: 展示用的字段
+    link_field: 用于连接到修改和数据详细显示的页面
+    '''
+    pk = 'id'
+    have_checkbox = True
+
+    # 管理列表页面的展示
+    list_display = []
+
+    def get_list_display(self):
+        if not self.list_display:
+            self.list_display = [one[0] for one in self.model_obj.fieldlist]
+        else:
+            self.list_display.remove('') if '' in self.list_display else 0
+        return self.list_display
+
+    # 连接字段
+    link_field = ()
+
+    def get_link_field(self):
+        if not self.link_field:
+            self.link_field = (self.pk,)
+        return self.link_field
+
+    #
+    fields = ()
+
+    def changelist_view(self, request, *args, **kwargs):
+        self.link_field = self.get_link_field()
+        thead = self.get_list_display()
+        if self.have_checkbox:
+            thead.insert(0, '')
+        show_list = []
+        for single_data in self.model_obj.all():
+            if self.have_checkbox:
+                data_list = [mark_safe('<input type="checkbox" name="select" id="%s">' % single_data.get(self.pk))]
+                start_inex = 1
+            else:
+                data_list = []
+                start_inex = 0
+            for field_ in thead[start_inex:]:
+                data_list.append(single_data.get(field_) if field_ not in self.link_field else mark_safe(
+                    '<a href="{1}/change/">{0}</a>'.format(single_data.get(field_), single_data.get(self.pk))))
+            show_list.append(data_list)
+        return render(request, 'changelist.html', {'show_list': show_list, 'thead_': thead})
+
+    def add_view(self, request, *args, **kwargs):
+        the_form = self.create_form()
+        return render(request, 'add.html', {'the_form': the_form})
+
+    def __init__(self, model_obj, site):
+        self.model_obj = model_obj
+        self.site = site
+        self.request = None
+        self._query_param_key = "_listfilter"
+        self.search_key = "_q"
+
     def create_form(self, single_data=None):
         info_dict = collections.OrderedDict()
         single_data = single_data if single_data else dict()
-        for field_obj in self.fieldlist:
+        for field_obj in self.model_obj.fieldlist:
             if field_obj[1] == str:
                 info_dict[field_obj[0]] = fields.CharField(
                     required=not field_obj[2],
@@ -143,7 +204,7 @@ class SQLModel(SQLConnect):
                     error_messages={
                         "required": "%s不能为空" % field_obj[0],
                     },
-                    widget=widgets.SplitDateTimeWidget(
+                    widget=widgets.DateInput(
                         attrs={
                             "placeholder": field_obj[0],
                             "class": "form-control col-md-7 col-xs-12"
@@ -152,58 +213,7 @@ class SQLModel(SQLConnect):
                     label=field_obj[0],
                     initial=single_data.get(field_obj[0])
                 )
-        return type('%sForm' % self.alias, (Form,), info_dict)
-
-
-class PlutoConfig(object):
-    '''
-    list_display: 展示用的字段
-    '''
-    pk = 'id'
-
-    have_checkbox = True
-
-    # 管理列表页面的展示
-    list_display = []
-
-    def get_list_display(self):
-        if not self.list_display:
-            self.list_display = [one[0] for one in self.model_obj.fieldlist]
-        return self.list_display
-
-    # 连接字段
-    link_field = ()
-
-    def get_link_field(self):
-        if not self.link_field:
-            self.link_field = (self.pk,)
-        return self.link_field
-
-    def changelist_view(self, request, *args, **kwargs):
-        self.link_field = self.get_link_field()
-        thead = self.get_list_display()
-        if self.have_checkbox:
-            thead.insert(0, '')
-        show_list = []
-        for single_data in self.model_obj.all():
-            if self.have_checkbox:
-                data_list = [mark_safe('<input type="checkbox" name="select" id="%s">' % single_data.get(self.pk))]
-                start_inex = 1
-            else:
-                data_list = []
-                start_inex = 0
-            for field_ in thead[start_inex:]:
-                data_list.append(single_data.get(field_) if field_ not in self.link_field else mark_safe(
-                    '<a href="{1}/change/">{0}</a>'.format(single_data.get(field_), single_data.get(self.pk))))
-            show_list.append(data_list)
-        return render(request, 'changelist.html', {'show_list': show_list, 'thead_': thead})
-
-    def __init__(self, model_obj, site):
-        self.model_obj = model_obj
-        self.site = site
-        self.request = None
-        self._query_param_key = "_listfilter"
-        self.search_key = "_q"
+        return type('%sForm' % self.model_obj.alias, (Form,), info_dict)
 
     def wrap(self, view_func):
         def inner(request, *args, **kwargs):
@@ -230,22 +240,21 @@ class PlutoConfig(object):
     def urls(self):
         return self.get_urls()
 
-    def add_view(self, request, *args, **kwargs):
-        the_form = self.model_obj.create_form()
-        return render(request, 'add.html', {'the_form': the_form})
-
     def delete_view(self, request, *args, **kwargs):
         if request.method == 'GET':
             return render(request, 'delete.html')
 
     def change_view(self, request, *args, **kwargs):
+        exec('single_data = self.model_obj.filter({0}=args[0])[0]'.format(self.pk))
+        the_form = self.create_form(vars()['single_data'])
         if request.method == 'GET':
-            exec('single_data = self.model_obj.filter({0}=args[0])[0]'.format(self.pk))
-            the_form = self.model_obj.create_form(vars()['single_data'])
             return render(request, 'change.html', {'the_form': the_form})
         if request.method == 'POST':
-            print(request.POST)
-            return redirect('/pluto/%s/' % self.model_obj.alias)
+            form_obj = the_form(request.POST)
+            if form_obj.is_valid():
+                return redirect('/pluto/%s/' % self.model_obj.alias)
+            else:
+                return render(request, "change.html", {"form_obj": form_obj})
 
 
 class PlutoSite(object):
