@@ -98,6 +98,21 @@ class SQLModel(SQLConnect):
         except Exception as e:
             return e
 
+    def update(self, set_info, where_info):
+        try:
+            conn, cur = self.new_connect()
+            cur.execute('''
+            update %s
+            set %s
+            where %s
+            ''' % (self.tablename, set_info, where_info))
+            cur.commit()
+            cur.close()
+            conn.close()
+            return '200'
+        except Exception as e:
+            return e
+
 
 class PlutoConfig(object):
     '''
@@ -132,7 +147,7 @@ class PlutoConfig(object):
 
     def get_fields(self):
         if not self.fields:
-            self.fields = self.model_obj.fieldlist
+            self.fields = [i[0] for i in self.model_obj.fieldlist]
         return self.fields
 
     def changelist_view(self, request, *args, **kwargs):
@@ -156,12 +171,51 @@ class PlutoConfig(object):
 
 
     def add_view(self, request, *args, **kwargs):
+        the_form = self.create_form()
         if request.method == 'GET':
-            the_form = self.create_form()
             return render(request, 'add.html', {'the_form': the_form})
-        else:
-            self.model_obj.save()
-            return redirect('/pluto/%s/' % self.model_obj.alias)
+        if request.method == 'POST':
+            form_obj = the_form(request.POST)
+            if form_obj.is_valid():
+                fields, values = [], []
+                for k, v in request.POST.items():
+                    if k == 'csrfmiddlewaretoken': continue
+                    fields.append(k), values.append(v)
+                fields_str, values_str = '(%s)' % str(fields).strip('[]').replace('\'', ''), '(%s)' % str(
+                    values).strip('[]')
+                info = self.model_obj.save(fields_str, values_str)
+                if info == '200':
+                    return redirect('/pluto/%s/' % self.model_obj.alias)
+                else:
+                    return render(request, "change.html", {"form_obj": form_obj, 'e': info})
+            else:
+                return render(request, "change.html", {"form_obj": the_form})
+
+    def delete_view(self, request, *args, **kwargs):
+        if request.method == 'GET':
+            return render(request, 'delete.html')
+
+    def change_view(self, request, *args, **kwargs):
+        exec('single_data = self.model_obj.filter({0}=args[0])[0]'.format(self.pk))
+        the_form = self.create_form(vars()['single_data'])
+        if request.method == 'GET':
+            return render(request, 'change.html', {'the_form': the_form})
+        if request.method == 'POST':
+            form_obj = the_form(request.POST)
+            if form_obj.is_valid():
+                set_data = []
+                for k, v in request.POST.items():
+                    if k == 'csrfmiddlewaretoken': continue
+                    set_data.append('%s=%s' % (k, "'%s'" % v if isinstance(v, str) else v))
+                pk_value = 'aaa'
+                where_data = '%s=%s' % (self.pk, "'%s'" % pk_value if isinstance(pk_value, str) else pk_value)
+                info =  self.model_obj.update( ','.join(set_data), where_data)
+                if info == '200':
+                    return redirect('/pluto/%s/' % self.model_obj.alias)
+                else:
+                    return render(request, "change.html", {"form_obj": form_obj, 'e': info})
+            else:
+                return render(request, "change.html", {"form_obj": the_form})
 
 
     def __init__(self, model_obj, site):
@@ -263,31 +317,6 @@ class PlutoConfig(object):
     def urls(self):
         return self.get_urls()
 
-    def delete_view(self, request, *args, **kwargs):
-        if request.method == 'GET':
-            return render(request, 'delete.html')
-
-    def change_view(self, request, *args, **kwargs):
-        exec('single_data = self.model_obj.filter({0}=args[0])[0]'.format(self.pk))
-        the_form = self.create_form(vars()['single_data'])
-        if request.method == 'GET':
-            return render(request, 'change.html', {'the_form': the_form})
-        if request.method == 'POST':
-            form_obj = the_form(request.POST)
-            if form_obj.is_valid():
-                fields, values = [], []
-                for k, v in request.POST.items():
-                    if k == 'csrfmiddlewaretoken': continue
-                    fields.append(k), values.append(v)
-                fields_str, values_str = '(%s)' % str(fields).strip('[]'), '(%s)' % str(values).strip('[]')
-                info =  self.model_obj.save(fields_str, values_str)
-                if info == '200':
-                    return redirect('/pluto/%s/' % self.model_obj.alias)
-                else:
-                    return render(request, "change.html", {"form_obj": form_obj, 'e': info})
-            else:
-                return render(request, "change.html", {"form_obj": the_form})
-
 
 class PlutoSite(object):
 
@@ -316,6 +345,7 @@ site = PlutoSite()
 
 a = SQLModel(settings.SQL_ARGS, settings.SQL_DATABASE['brandcheck'], 'masasys.dbo.tb_sys_all_brand_clean', 'BrandClean')
 b = SQLModel(settings.SQL_ARGS, settings.SQL_DATABASE['brandcheck'], 'masasys.dbo.tb_sys_brand_info', 'BrandInfo')
+c = SQLModel(settings.SQL_ARGS, settings.SQL_DATABASE['catecheck2'], 'catSort.dbo.venncate_2018', 'Cate')
 
 class AConfig(PlutoConfig):
     have_checkbox = False
@@ -328,6 +358,10 @@ class BConfig(PlutoConfig):
     pk = 'brandId'
     fields = ['brandId', 'brandStr', 'brandcn', 'brandxn']
 
+class CConfig(PlutoConfig):
+    pk = 'sid'
+    list_display = ['sid', 'lcatname', 'mcatname', 'scatname']
 
 site.register(a, AConfig)
 site.register(b, BConfig)
+site.register(c, CConfig)
