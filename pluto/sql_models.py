@@ -200,20 +200,20 @@ class PlutoConfig(object):
         the_form = self.create_form(vars()['single_data'])
         if request.method == 'GET':
             return render(request, 'change.html', {'the_form': the_form})
-        if request.method == 'POST':
+        elif request.method == 'POST':
             form_obj = the_form(request.POST)
             if form_obj.is_valid():
                 set_data = []
                 for k, v in request.POST.items():
                     if k == 'csrfmiddlewaretoken': continue
                     set_data.append('%s=%s' % (k, "'%s'" % v if isinstance(v, str) else v))
-                pk_value = 'aaa'
-                where_data = '%s=%s' % (self.pk, "'%s'" % pk_value if isinstance(pk_value, str) else pk_value)
+                exec("pk_value = single_data.get(self.pk)")
+                where_data = '%s=%s' % (self.pk, "'%s'" % vars()['pk_value'] if isinstance(vars()['pk_value'], str) else vars()['pk_value'])
                 info =  self.model_obj.update( ','.join(set_data), where_data)
                 if info == '200':
                     return redirect('/pluto/%s/' % self.model_obj.alias)
                 else:
-                    return render(request, "change.html", {"form_obj": form_obj, 'e': info})
+                    return render(request, "change.html", {"form_obj": the_form, 'e': info})
             else:
                 return render(request, "change.html", {"form_obj": the_form})
 
