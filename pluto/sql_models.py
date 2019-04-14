@@ -120,6 +120,7 @@ class PlutoConfig(object):
     have_checkbox: 是否有多选框
     list_display: 展示用的字段
     link_field: 用于连接到修改和数据详细显示的页面
+    fields: 用于展示哪个字段
     '''
     pk = 'id'
     have_checkbox = True
@@ -342,26 +343,3 @@ class PlutoSite(object):
 
 
 site = PlutoSite()
-
-a = SQLModel(settings.SQL_ARGS, settings.SQL_DATABASE['brandcheck'], 'masasys.dbo.tb_sys_all_brand_clean', 'BrandClean')
-b = SQLModel(settings.SQL_ARGS, settings.SQL_DATABASE['brandcheck'], 'masasys.dbo.tb_sys_brand_info', 'BrandInfo')
-c = SQLModel(settings.SQL_ARGS, settings.SQL_DATABASE['catecheck2'], 'catSort.dbo.venncate_2018', 'Cate')
-
-class AConfig(PlutoConfig):
-    have_checkbox = False
-    pk = 'brandid'
-    list_display = ['brandid', 'media', 'code', 'itemBrand']
-
-
-class BConfig(PlutoConfig):
-    list_display = ['brandId', 'brandStr', 'brandcn', 'branden']
-    pk = 'brandId'
-    fields = ['brandId', 'brandStr', 'brandcn', 'brandxn']
-
-class CConfig(PlutoConfig):
-    pk = 'sid'
-    list_display = ['sid', 'lcatname', 'mcatname', 'scatname']
-
-site.register(a, AConfig)
-site.register(b, BConfig)
-site.register(c, CConfig)
